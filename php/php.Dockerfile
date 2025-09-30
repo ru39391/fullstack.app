@@ -1,3 +1,30 @@
-FROM php:8.0-fpm
+FROM php:8.2-fpm
 
-RUN docker-php-ext-install mysqli pdo pdo_mysql
+RUN apt update && apt-get install -y \
+    libzip-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    zip
+
+RUN docker-php-ext-install \
+    gd \
+    zip \
+    curl \
+    intl \
+    mbstring \
+    mysqlnd \
+    mysqli \
+    opcache \
+    pdo \
+    pdo_mysql \
+    session \
+    tokenizer \
+    dom \
+    json \
+    xml \
+    xmlreader \
+    xmlwriter \
+    simplexml
+
+RUN echo "memory_limit=256M" > /usr/local/etc/php/conf.d/custom.ini \
+    && echo "upload_max_filesize=64M" >> /usr/local/etc/php/conf.d/custom.ini
