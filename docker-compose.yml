@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:11
+    container_name: default_db
+    restart: unless-stopped # перезапускать всегда, кроме явной остановки контейнера командой docker stop или docker-compose stop
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./db:/var/lib/mysql
+    networks:
+      - default_network
+
+  nginx:
+    image: nginx:1.25
+    container_name: default_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./public:/var/www/html
+      - ./logs:/var/www/html/logs
+      # - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - default_network
+
+  php:
+    build: 
+      context: ./php
+      dockerfile: php.Dockerfile
+    container_name: default_php
+    restart: unless-stopped
+    volumes:
+      - ./public:/var/www/html
+      # - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+    environment:
+      DB_HOST: db
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      - db
+    networks:
+      - default_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: default_pma
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - default_network
+
+networks:
+  default_network:
+    driver: bridge
