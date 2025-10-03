@@ -77,7 +77,7 @@ services:
       - ./public:/app
       - /app/node_modules
     ports:
-      - "5173:5173"
+      - "80:5173"
     depends_on:
       - nginx
     networks:
