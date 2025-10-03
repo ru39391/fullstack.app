@@ -20,9 +20,10 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./public:/var/www/html
+      - ./cms:/var/www/html
       - ./logs:/var/log/nginx
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/react.conf:/etc/nginx/conf.d/react.conf
     depends_on:
       - php
     networks:
@@ -35,14 +36,14 @@ services:
       dockerfile: Dockerfile
     container_name: default_php
     restart: unless-stopped
-    volumes:
-      - ./public:/var/www/html
-      # - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
     environment:
       DB_HOST: db
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./cms:/var/www/html
+      # - ./php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
     depends_on:
       - db
     networks:
@@ -59,6 +60,26 @@ services:
       - "8080:80"
     depends_on:
       - db
+    networks:
+      - default_network
+
+  app:
+    image: default-react-app
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    container_name: default_react_app
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./public:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - nginx
     networks:
       - default_network
 
