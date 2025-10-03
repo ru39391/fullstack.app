@@ -18,12 +18,12 @@ services:
     container_name: default_nginx
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "3000:80"
     volumes:
       - ./cms:/var/www/html
       - ./logs:/var/log/nginx
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx/react.conf:/etc/nginx/conf.d/react.conf
+      #- ./nginx/react.conf:/etc/nginx/conf.d/react.conf
     depends_on:
       - php
     networks:
